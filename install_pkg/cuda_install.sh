@@ -1,4 +1,4 @@
-distro=ubuntu2204
+distro=$1
 
 curl -o /tmp/cuda-keyring.deb -L https://developer.download.nvidia.com/compute/cuda/repos/$distro/x86_64/cuda-keyring_1.1-1_all.deb && \
     dpkg -i /tmp/cuda-keyring.deb && \
