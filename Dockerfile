@@ -82,18 +82,18 @@ RUN /tmp/.fzf/install --key-bindings --completion --no-update-rc --no-bash --no-
 
 RUN apt clean && rm -rf /var/lib/apt/lists/*
 
-ENV LLVM_VERSION=18
+ENV LLVM_VERSION=20
 RUN curl -s -o - https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
 
 RUN echo '\
-# deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy main\n\
-# deb-src http://apt.llvm.org/jammy/ llvm-toolchain-jammy main\n\
-# 18\n\
-deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-18 main\n\
-deb-src http://apt.llvm.org/jammy/ llvm-toolchain-jammy-18 main\n\
-# # 19\n\
-# deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-19 main\n\
-# deb-src http://apt.llvm.org/jammy/ llvm-toolchain-jammy-19 main\
+deb http://apt.llvm.org/bookworm/ llvm-toolchain-bookworm main
+deb-src http://apt.llvm.org/bookworm/ llvm-toolchain-bookworm main
+# 19 
+deb http://apt.llvm.org/bookworm/ llvm-toolchain-bookworm-19 main
+deb-src http://apt.llvm.org/bookworm/ llvm-toolchain-bookworm-19 main
+# 20 
+deb http://apt.llvm.org/bookworm/ llvm-toolchain-bookworm-20 main
+deb-src http://apt.llvm.org/bookworm/ llvm-toolchain-bookworm-20 main
 ' > /etc/apt/sources.list.d/llvm.list
 
 RUN apt update && apt install -y \
