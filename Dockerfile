@@ -1,6 +1,8 @@
 FROM ubuntu:jammy
 
 ARG USER_PASSWD
+ENV distro=ubuntu2204
+ENV distro_codename=jammy
 
 COPY apt/cn_sources.list /etc/apt/sources.list
 RUN apt update 
@@ -25,7 +27,6 @@ RUN mkdir /var/run/sshd && \
     echo 'PasswordAuthentication yes' >> /etc/ssh/sshd_config && \
     echo 'AllowUsers zhiqiangz' >> /etc/ssh/sshd_config
 
-ENV distro=ubuntu2204
 
 # add-apt-repository ppa:zhangsongcui3371/fastfetch -y
 # RUN add-apt-repository ppa:neovim-ppa/unstable -y
@@ -84,16 +85,16 @@ RUN apt clean && rm -rf /var/lib/apt/lists/*
 ENV LLVM_VERSION=18
 RUN curl -s -o - https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
 
-RUN echo '\
-# deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy main\n\
-# deb-src http://apt.llvm.org/jammy/ llvm-toolchain-jammy main\n\
+RUN echo "\
+# deb http://apt.llvm.org/${distro_codename}/ llvm-toolchain-${distro_codename} main\n\
+# deb-src http://apt.llvm.org/${distro_codename}/ llvm-toolchain-${distro_codename} main\n\
 # 18\n\
-deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-18 main\n\
-deb-src http://apt.llvm.org/jammy/ llvm-toolchain-jammy-18 main\n\
+deb http://apt.llvm.org/${distro_codename}/ llvm-toolchain-${distro_codename}-18 main\n\
+deb-src http://apt.llvm.org/${distro_codename}/ llvm-toolchain-${distro_codename}-18 main\n\
 # # 19\n\
-# deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-19 main\n\
-# deb-src http://apt.llvm.org/jammy/ llvm-toolchain-jammy-19 main\
-' > /etc/apt/sources.list.d/llvm.list
+# deb http://apt.llvm.org/${distro_codename}/ llvm-toolchain-${distro_codename}-19 main\n\
+# deb-src http://apt.llvm.org/${distro_codename}/ llvm-toolchain-${distro_codename}-19 main\
+" > /etc/apt/sources.list.d/llvm.list
 
 RUN apt update && apt install -y \
 	clang-$LLVM_VERSION \

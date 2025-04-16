@@ -1,14 +1,15 @@
+distro_codename=$1
 
 curl -s -o - https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
 cat <<EOF > /etc/apt/sources.list.d/llvm.list
-# deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy main
-# deb-src http://apt.llvm.org/jammy/ llvm-toolchain-jammy main
+# deb http://apt.llvm.org/$distro_codename/ llvm-toolchain-$distro_codename main
+# deb-src http://apt.llvm.org/$distro_codename/ llvm-toolchain-$distro_codename main
 # 18
-deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-18 main
-deb-src http://apt.llvm.org/jammy/ llvm-toolchain-jammy-18 main
+deb http://apt.llvm.org/$distro_codename/ llvm-toolchain-$distro_codename-18 main
+deb-src http://apt.llvm.org/$distro_codename/ llvm-toolchain-$distro_codename-18 main
 # # 19
-# deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-19 main
-# deb-src http://apt.llvm.org/jammy/ llvm-toolchain-jammy-19 main
+# deb http://apt.llvm.org/$distro_codename/ llvm-toolchain-$distro_codename-19 main
+# deb-src http://apt.llvm.org/$distro_codename/ llvm-toolchain-$distro_codename-19 main
 EOF
 
 apt update
