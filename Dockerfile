@@ -101,7 +101,8 @@ RUN apt update && apt install -y \
 	lld-$LLVM_VERSION \
 	lldb-$LLVM_VERSION \
     llvm-$LLVM_VERSION \
-	clangd-$LLVM_VERSION 
+	clangd-$LLVM_VERSION \
+	clang-format-$LLVM_VERSION 
 
 RUN update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-$LLVM_VERSION 100 
 RUN update-alternatives --install /usr/bin/clang clang /usr/bin/clang-$LLVM_VERSION 100 
@@ -110,6 +111,7 @@ RUN update-alternatives --install /usr/bin/llc llc /usr/bin/llc-$LLVM_VERSION 10
 RUN update-alternatives --install /usr/bin/lld lld /usr/bin/lld-$LLVM_VERSION 100 
 RUN update-alternatives --install /usr/bin/lldb lldb /usr/bin/lldb-$LLVM_VERSION 100 
 RUN update-alternatives --install /usr/bin/clangd clangd /usr/bin/clangd-$LLVM_VERSION 100 
+RUN update-alternatives --install /usr/bin/clang-format clangd /usr/bin/clang-format-$LLVM_VERSION 100 
 
 COPY install_pkg/cuda_install.sh /tmp/cuda_install.sh
 # RUN bash /tmp/cuda_install.sh $distro
