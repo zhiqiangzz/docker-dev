@@ -114,35 +114,27 @@ RUN update-alternatives --install /usr/bin/lldb lldb /usr/bin/lldb-$LLVM_VERSION
 RUN update-alternatives --install /usr/bin/clangd clangd /usr/bin/clangd-$LLVM_VERSION 100 
 RUN update-alternatives --install /usr/bin/clang-format clangd /usr/bin/clang-format-$LLVM_VERSION 100 
 
-WORKDIR /tmp
-# install rust
-# - https://www.rust-lang.org/tools/install
-ENV RUSTUP_HOME=/usr/local/rustup \
-    CARGO_HOME=/usr/local/cargo \
-    PATH=/usr/local/cargo/bin:$PATH \
-    RUSTUP_DIST_SERVER=https://mirrors.ustc.edu.cn/rust-static \
-    RUSTUP_UPDATE_ROOT=https://mirrors.ustc.edu.cn/rust-static/rustup 
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
-    sh -s -- -y --no-modify-path --profile minimal --default-toolchain nightly
+COPY install_pkg/cuda_install.sh /tmp/cuda_install.sh
+# RUN bash /tmp/cuda_install.sh $distro
 
 RUN echo "\
-RUSTUP_HOME=/usr/local/rustup\n\
-CARGO_HOME=/usr/local/cargo\n\
 RUSTUP_DIST_SERVER=https://mirrors.ustc.edu.cn/rust-static\n\
 RUSTUP_UPDATE_ROOT=https://mirrors.ustc.edu.cn/rust-static/rustup\n\
 " >> /etc/environment
 
-RUN echo "\
-[[ ! -f /usr/local/cargo/env ]] || . /usr/local/cargo/env\
-" >> /etc/zsh/zshenv
+USER zhiqiangz
+WORKDIR /home/zhiqiangz
+ENV PATH=/home/zhiqiangz/.cargo/bin:$PATH \
+    RUSTUP_DIST_SERVER=https://mirrors.ustc.edu.cn/rust-static \
+    RUSTUP_UPDATE_ROOT=https://mirrors.ustc.edu.cn/rust-static/rustup 
+
+# install rust
+# - https://www.rust-lang.org/tools/install
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
+    sh -s -- -y --no-modify-path --profile minimal --default-toolchain nightly
 
 RUN cargo install --locked yazi-fm yazi-cli
 
-COPY install_pkg/cuda_install.sh /tmp/cuda_install.sh
-# RUN bash /tmp/cuda_install.sh $distro
-
-USER zhiqiangz
-WORKDIR /home/zhiqiangz
 COPY --chown=zhiqiangz:zhiqiangz install_pkg/user_basic_install.sh user_basic_install.sh
 COPY --chown=zhiqiangz:zhiqiangz set_proxy.sh set_proxy.sh
 RUN bash user_basic_install.sh
