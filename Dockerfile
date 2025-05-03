@@ -140,5 +140,34 @@ COPY --chown=zhiqiangz:zhiqiangz set_proxy.sh set_proxy.sh
 RUN bash user_basic_install.sh
 
 USER root
+WORKDIR /tmp
+ARG QEMU_VERSION=7.0.0
+
+RUN apt install -y \
+    wget build-essential libglib2.0-dev libfdt-dev libpixman-1-dev zlib1g-dev ninja-build
+RUN apt install -y \
+    gdb-multiarch libglib2.0-0 libfdt1 libpixman-1-0 zlib1g
+
+RUN wget https://download.qemu.org/qemu-${QEMU_VERSION}.tar.xz && \
+    tar xf qemu-${QEMU_VERSION}.tar.xz && \
+    cd qemu-${QEMU_VERSION} && \ 
+    ./configure --target-list=riscv64-softmmu,riscv64-linux-user && \
+    make -j$(nproc) && \
+    make install
+
+RUN ln -s /usr/bin/gdb-multiarch /usr/bin/riscv64-unknown-elf-gdb
+
+USER zhiqiangz
+WORKDIR /tmp
+COPY rust-toolchain.toml rust-toolchain.toml
+
+RUN rustup target add riscv64gc-unknown-none-elf && \
+    cargo install toml-cli cargo-binutils && \
+    RUST_VERSION=$(toml get -r rust-toolchain.toml toolchain.channel) && \
+    Components=$(toml get -r rust-toolchain.toml toolchain.components | jq -r 'join(" ")') && \
+    rustup install $RUST_VERSION && \
+    rustup component add --toolchain $RUST_VERSION $Components
+
+USER root
 EXPOSE 22
 CMD ["/usr/sbin/sshd", "-D"]
