@@ -112,10 +112,13 @@ RUN update-alternatives --install /usr/bin/llc llc /usr/bin/llc-$LLVM_VERSION 10
 RUN update-alternatives --install /usr/bin/lld lld /usr/bin/lld-$LLVM_VERSION 100 
 RUN update-alternatives --install /usr/bin/lldb lldb /usr/bin/lldb-$LLVM_VERSION 100 
 RUN update-alternatives --install /usr/bin/clangd clangd /usr/bin/clangd-$LLVM_VERSION 100 
-RUN update-alternatives --install /usr/bin/clang-format clangd /usr/bin/clang-format-$LLVM_VERSION 100 
+RUN update-alternatives --install /usr/bin/clang-format clangd-format /usr/bin/clang-format-$LLVM_VERSION 100 
 
 COPY install_pkg/cuda_install.sh /tmp/cuda_install.sh
 # RUN bash /tmp/cuda_install.sh $distro
+
+RUN apt install -y \
+    bear btop
 
 RUN echo "\
 RUSTUP_DIST_SERVER=https://mirrors.ustc.edu.cn/rust-static\n\
@@ -133,7 +136,7 @@ ENV PATH=/home/zhiqiangz/.cargo/bin:$PATH \
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
     sh -s -- -y --no-modify-path --profile minimal --default-toolchain nightly
 
-RUN cargo install --locked yazi-fm yazi-cli
+RUN cargo install --locked yazi-fm yazi-cli du-dust
 
 COPY --chown=zhiqiangz:zhiqiangz install_pkg/user_basic_install.sh user_basic_install.sh
 COPY --chown=zhiqiangz:zhiqiangz set_proxy.sh set_proxy.sh
