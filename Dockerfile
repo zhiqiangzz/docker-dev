@@ -4,11 +4,12 @@ ARG USER_PASSWD
 ENV distro=ubuntu2204
 ENV distro_codename=jammy
 
-COPY apt/cn_sources.list /etc/apt/sources.list
 RUN apt update 
 RUN apt install -y \
     ca-certificates && update-ca-certificates
 
+# COPY apt/cn_sources.list /etc/apt/sources.list
+# RUN apt update 
 RUN apt update && apt install -y \
     software-properties-common gpg gnupg gnupg2 \
     openssh-server sudo zsh curl wget vim locales
@@ -112,7 +113,9 @@ RUN update-alternatives --install /usr/bin/llc llc /usr/bin/llc-$LLVM_VERSION 10
 RUN update-alternatives --install /usr/bin/lld lld /usr/bin/lld-$LLVM_VERSION 100 
 RUN update-alternatives --install /usr/bin/lldb lldb /usr/bin/lldb-$LLVM_VERSION 100 
 RUN update-alternatives --install /usr/bin/clangd clangd /usr/bin/clangd-$LLVM_VERSION 100 
-RUN update-alternatives --install /usr/bin/clang-format clangd-format /usr/bin/clang-format-$LLVM_VERSION 100 
+RUN update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-$LLVM_VERSION 100 
+RUN update-alternatives --install /usr/bin/llvm-config llvm-config /usr/bin/llvm-config-$LLVM_VERSION 100 
+RUN update-alternatives --install /usr/bin/FileCheck FileCheck /usr/bin/FileCheck-$LLVM_VERSION 100 
 
 COPY install_pkg/cuda_install.sh /tmp/cuda_install.sh
 # RUN bash /tmp/cuda_install.sh $distro
@@ -139,7 +142,7 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
 RUN cargo install --locked yazi-fm yazi-cli du-dust
 
 COPY --chown=zhiqiangz:zhiqiangz install_pkg/user_basic_install.sh user_basic_install.sh
-COPY --chown=zhiqiangz:zhiqiangz set_proxy.sh set_proxy.sh
+# COPY --chown=zhiqiangz:zhiqiangz set_proxy.sh set_proxy.sh
 RUN bash user_basic_install.sh
 
 USER root

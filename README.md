@@ -1,7 +1,10 @@
 # Build and run
 ```shell
-image_name=xxx
-container_name=xxx
+ export passwd=xxx
+export image_name=xxx
+export container_name=xxx
+export network_name=xxx
+export ip_addr=172.1x.0.x
 
 docker build \
     --build-arg USER_PASSWD=$passwd \
@@ -18,8 +21,8 @@ docker run \
   --name=$container_name \
   --runtime=nvidia --gpus all \
   --shm-size=400g \
-  --network [network-name] \
-  --ip 172.1x.0.y \
+  --network $network_name \
+  --ip $ip_addr \
   -e HOST_PERMS="$(id -u):$(id -g)" \
   --label user=zhiqiangz \
   $image_name
@@ -45,6 +48,8 @@ done
 
 - create bridge net environment
 ```shell
-docker network create --driver=bridge --subnet=172.1x.0.0/16 --ip-range=172.1x.0.0/24 --gateway=172.1x.0.1 [network-name]
+export net_prefix=172.1x.0.
+export network_name=172.1x.0.
+docker network create --driver=bridge --subnet=$(net_prefix).0/16 --ip-range=$(net_prefix).0/24 --gateway=$(net_prefix).1 $network_name
 ```
 
