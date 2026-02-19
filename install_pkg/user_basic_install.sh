@@ -14,4 +14,8 @@ conda init --all
 
 # install tmux plugins manager
 git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+git clone https://github.com/zhiqiangzz/dotfiles.git ~/.config/dotfiles
+
+mkdir ~/.config/zim
+mkdir ~/.config/yazi
 popd

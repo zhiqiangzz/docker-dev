@@ -1,13 +1,12 @@
 # Build and run
 ```shell
- export passwd=xxx
-export image_name=xxx
-export container_name=xxx
-export network_name=xxx
-export ip_addr=172.1x.0.x
+export image_name=zhiqiangzz/cuda-dev:v0
+export container_name=zhiqiangz-cuda-dev
+export network_name=zhiqiangz-bridge
+export ip_addr=172.18.0.2
+export user=zhiqiangz
 
 docker build \
-    --build-arg USER_PASSWD=$passwd \
     --build-arg HTTP_PROXY=$http_proxy \
     --build-arg HTTPS_PROXY=$https_proxy \
     -t $image_name \
@@ -24,11 +23,22 @@ docker run \
   --network $network_name \
   --ip $ip_addr \
   -e HOST_PERMS="$(id -u):$(id -g)" \
-  --label user=zhiqiangz \
+  -e SSH_PUBLIC_KEY="$(cat ~/.ssh/id_rsa.pub)" \
+  --label user=${user} \
   $image_name
 ```
 
 # Useful commands
+- generate ssh keys
+``` shell
+ssh-keygen -t rsa -b 4096 -C "zhiqiangz@hnu.edu.cn"
+```
+
+- configure passwordless ssh login
+``` shell
+ssh-copy-id -f -i ~/.ssh/host_keys/id_rsa.pub zhiqiangz@172.18.0.2
+```
+
 - quick filter out container belongs to zhiqiangz
 ```shell
 docker ps  --filter "label=user=zhiqiangz"
@@ -48,8 +58,8 @@ done
 
 - create bridge net environment
 ```shell
-export net_prefix=172.1x.0.
-export network_name=172.1x.0.
-docker network create --driver=bridge --subnet=$(net_prefix).0/16 --ip-range=$(net_prefix).0/24 --gateway=$(net_prefix).1 $network_name
+export net_prefix=172.18.0
+export network_name=zhiqiangz-bridge
+docker network create --driver=bridge --subnet=$net_prefix.0/16 --ip-range=$net_prefix.0/24 --gateway=$net_prefix.1 $network_name
 ```
 

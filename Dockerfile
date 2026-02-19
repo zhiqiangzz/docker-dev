@@ -1,8 +1,8 @@
-FROM ubuntu:jammy
+FROM ubuntu:noble
 
-ARG USER_PASSWD
-ENV distro=ubuntu2204
-ENV distro_codename=jammy
+ENV distro=ubuntu2404
+ENV distro_codename=noble
+ENV user=zhiqiangz
 
 RUN apt update 
 RUN apt install -y \
@@ -14,40 +14,28 @@ RUN apt update && apt install -y \
     software-properties-common gpg gnupg gnupg2 \
     openssh-server sudo zsh curl wget vim locales
 
+# ================ docker build only begin ================
 ENV TZ=Asia/Shanghai
 RUN locale-gen en_US.UTF-8 && \
     update-locale LANG=en_US.UTF-8 && \
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-RUN useradd -m -s $(which zsh) zhiqiangz && \
-    echo zhiqiangz:${USER_PASSWD} | chpasswd && \
-    usermod -aG sudo zhiqiangz
+RUN useradd -m -s $(which zsh) $user && \
+    usermod -aG sudo $user && \
+    passwd -l $user && \
+    echo "$user ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$user && \
+    chmod 0440 /etc/sudoers.d/$user
 
 RUN mkdir /var/run/sshd && \
     echo 'PermitRootLogin no' >> /etc/ssh/sshd_config && \
-    echo 'PasswordAuthentication yes' >> /etc/ssh/sshd_config && \
-    echo 'AllowUsers zhiqiangz' >> /etc/ssh/sshd_config
-
-
-# add-apt-repository ppa:zhangsongcui3371/fastfetch -y
-# RUN add-apt-repository ppa:neovim-ppa/unstable -y
-
-RUN curl -s -o - https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
-RUN echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | tee /etc/apt/sources.list.d/gierens.list
-RUN chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list
-
-RUN curl -o /tmp/fastfetch.deb -L https://github.com/fastfetch-cli/fastfetch/releases/download/2.37.0/fastfetch-linux-amd64.deb && \
-    dpkg -i /tmp/fastfetch.deb && \
-    rm -f /tmp/fastfetch.deb
-
-RUN curl -o /tmp/fd.deb -L https://github.com/sharkdp/fd/releases/download/v10.2.0/fd_10.2.0_amd64.deb && \
-    dpkg -i /tmp/fd.deb && \
-    rm -f /tmp/fd.deb
+    echo 'PubkeyAuthentication yes' >> /etc/ssh/sshd_config && \
+    echo 'AllowUsers $user' >> /etc/ssh/sshd_config
+# ================ docker build only end ================
 
 RUN apt update 
 
 RUN apt install -y \
-    locales \
+    file \
     tldr \
     net-tools telnet iputils-ping \
     unzip p7zip-full 7zip\
@@ -63,11 +51,27 @@ RUN apt install -y \
     libstdc++-12-dev \
     cmake \
     make \
-    ninja-build 
+    ninja-build \
+    bear 
 
-RUN apt install -y \
-    bat eza file
 
+RUN git clone --depth 1 https://github.com/junegunn/fzf.git /tmp/.fzf
+RUN /tmp/.fzf/install --key-bindings --completion --no-update-rc --no-bash --no-zsh --no-fish && \
+    cp /tmp/.fzf/bin/fzf /usr/bin
+
+RUN curl -s -o - https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
+RUN echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | tee /etc/apt/sources.list.d/gierens.list
+RUN chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list
+
+RUN curl -o /tmp/fastfetch.deb -L https://github.com/fastfetch-cli/fastfetch/releases/download/2.37.0/fastfetch-linux-amd64.deb && \
+    dpkg -i /tmp/fastfetch.deb && \
+    rm -f /tmp/fastfetch.deb
+
+RUN curl -o /tmp/fd.deb -L https://github.com/sharkdp/fd/releases/download/v10.2.0/fd_10.2.0_amd64.deb && \
+    dpkg -i /tmp/fd.deb && \
+    rm -f /tmp/fd.deb
+
+# ================ docker build only begin ================
 RUN curl -fsSL https://github.com/neovim/neovim/archive/refs/tags/v0.10.4.zip -o /tmp/nvim_src.zip  
 RUN unzip /tmp/nvim_src.zip -d /tmp/ && \
     cd /tmp/neovim-0.10.4 && \
@@ -77,25 +81,20 @@ RUN unzip /tmp/nvim_src.zip -d /tmp/ && \
     sudo dpkg -i --force-overwrite nvim-linux-x86_64.deb && \
     rm -rf /tmp/nvim_src.zip /tmp/neovim-0.10.4
 
-RUN git clone --depth 1 https://github.com/junegunn/fzf.git /tmp/.fzf
-RUN /tmp/.fzf/install --key-bindings --completion --no-update-rc --no-bash --no-zsh --no-fish && \
-    cp /tmp/.fzf/bin/fzf /usr/bin
 
-RUN apt clean && rm -rf /var/lib/apt/lists/*
-
-ENV LLVM_VERSION=18
+ENV LLVM_VERSION=21
 RUN curl -s -o - https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
 
 # install llvm toolchain related
-RUN echo "\
-# deb http://apt.llvm.org/${distro_codename}/ llvm-toolchain-${distro_codename} main\n\
-# deb-src http://apt.llvm.org/${distro_codename}/ llvm-toolchain-${distro_codename} main\n\
-# 18\n\
-deb http://apt.llvm.org/${distro_codename}/ llvm-toolchain-${distro_codename}-18 main\n\
-deb-src http://apt.llvm.org/${distro_codename}/ llvm-toolchain-${distro_codename}-18 main\n\
-# # 19\n\
-# deb http://apt.llvm.org/${distro_codename}/ llvm-toolchain-${distro_codename}-19 main\n\
-# deb-src http://apt.llvm.org/${distro_codename}/ llvm-toolchain-${distro_codename}-19 main\
+RUN echo -e "\
+deb http://apt.llvm.org/${distro_codename}/ llvm-toolchain-${distro_codename} main\n\
+deb-src http://apt.llvm.org/${distro_codename}/ llvm-toolchain-${distro_codename} main\n\
+# 20\n\
+deb http://apt.llvm.org/${distro_codename}/ llvm-toolchain-${distro_codename}-20 main\n\
+deb-src http://apt.llvm.org/${distro_codename}/ llvm-toolchain-${distro_codename}-20 main\n\
+# 21\n\
+deb http://apt.llvm.org/${distro_codename}/ llvm-toolchain-${distro_codename}-21 main\n\
+deb-src http://apt.llvm.org/${distro_codename}/ llvm-toolchain-${distro_codename}-21 main\
 " > /etc/apt/sources.list.d/llvm.list
 
 RUN apt update && apt install -y \
@@ -117,20 +116,24 @@ RUN update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/cl
 RUN update-alternatives --install /usr/bin/llvm-config llvm-config /usr/bin/llvm-config-$LLVM_VERSION 100 
 RUN update-alternatives --install /usr/bin/FileCheck FileCheck /usr/bin/FileCheck-$LLVM_VERSION 100 
 
+# ================ docker build only end ================
+
 COPY install_pkg/cuda_install.sh /tmp/cuda_install.sh
 # RUN bash /tmp/cuda_install.sh $distro
 
 RUN apt install -y \
-    bear btop
+    bat eza btop
+
+RUN apt clean && rm -rf /var/lib/apt/lists/*
 
 RUN echo "\
 RUSTUP_DIST_SERVER=https://mirrors.ustc.edu.cn/rust-static\n\
 RUSTUP_UPDATE_ROOT=https://mirrors.ustc.edu.cn/rust-static/rustup\n\
 " >> /etc/environment
 
-USER zhiqiangz
-WORKDIR /home/zhiqiangz
-ENV PATH=/home/zhiqiangz/.cargo/bin:$PATH \
+USER $user
+WORKDIR /home/$user
+ENV PATH=/home/$user/.cargo/bin:$PATH \
     RUSTUP_DIST_SERVER=https://mirrors.ustc.edu.cn/rust-static \
     RUSTUP_UPDATE_ROOT=https://mirrors.ustc.edu.cn/rust-static/rustup 
 
@@ -141,10 +144,13 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
 
 RUN cargo install --locked yazi-fm yazi-cli du-dust
 
-COPY --chown=zhiqiangz:zhiqiangz install_pkg/user_basic_install.sh user_basic_install.sh
-# COPY --chown=zhiqiangz:zhiqiangz set_proxy.sh set_proxy.sh
+COPY --chown=$user:$user install_pkg/user_basic_install.sh user_basic_install.sh
+# COPY --chown=$user:$user set_proxy.sh set_proxy.sh
 RUN bash user_basic_install.sh
 
 USER root
+COPY docker-entrypoint.sh /usr/local/bin/
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh", "$user"]
+
 EXPOSE 22
 CMD ["/usr/sbin/sshd", "-D"]
