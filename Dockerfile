@@ -8,6 +8,9 @@ ENV TZ=Asia/Shanghai
 ENV LANG=en_US.UTF-8
 ENV LC_ALL=en_US.UTF-8
 
+ARG USER_UID=1000
+ARG USER_GID=1000
+
 SHELL ["/bin/bash", "-c"]
 
 # =========================
@@ -47,6 +50,7 @@ RUN apt update && apt install -y \
     ninja-build \
     bear \
     bat \
+    lldb clangd clang-format \
     btop && \
     update-ca-certificates && \
     locale-gen en_US.UTF-8 && \
@@ -57,7 +61,14 @@ RUN apt update && apt install -y \
 # =========================
 # User setup
 # =========================
-RUN useradd -m -s "$(which zsh)" "$user" && \
+RUN if getent passwd $USER_UID >/dev/null; then \
+        userdel -r "$(getent passwd $USER_UID | cut -d: -f1)"; \
+    fi && \
+    if getent group $USER_GID >/dev/null; then \
+        groupdel "$(getent group $USER_GID | cut -d: -f1)"; \
+    fi && \
+    groupadd -g $USER_GID "$user" && \
+    useradd -m -u $USER_UID -g $USER_GID -s "$(which zsh)" "$user" && \
     usermod -aG sudo "$user" && \
     passwd -l "$user" && \
     echo "$user ALL=(ALL) NOPASSWD:ALL" > "/etc/sudoers.d/$user" && \
@@ -118,7 +129,7 @@ RUN curl -o /tmp/fd.deb -L \
 # =========================
 RUN curl -sSfL https://raw.githubusercontent.com/bootandy/dust/refs/heads/master/install.sh | sh
 
-ARG INSTALL_CUDA=true
+ARG INSTALL_CUDA=false
 ARG INSTALL_LLVM=false
 ARG LLVM_VERSION=21
 

@@ -4,16 +4,20 @@ export image_name=zhiqiangzz/cuda-dev:v0
 export container_name=zhiqiangz-cuda-dev
 export network_name=zhiqiangz-bridge
 export ip_addr=172.18.0.2
-export user=zhiqiangz
+export user=zhiqiangz container_hostname=cuda_related
 
 docker build \
     --build-arg HTTP_PROXY=$http_proxy \
     --build-arg HTTPS_PROXY=$https_proxy \
+    --build-arg USER_UID=$(id -u) \
+    --build-arg USER_GID=$(id -g) \
     -t $image_name \
     --network host \
     .
 
 # -v host_dir:container_dir
+
+mkdir -p /home/zhiqiangz/container/$container_name/workspace
 docker run \
   -d --privileged \
   --cap-add=SYS_PTRACE --security-opt seccomp=unconfined \
@@ -22,9 +26,10 @@ docker run \
   --shm-size=400g \
   --network $network_name \
   --ip $ip_addr \
-  -e HOST_PERMS="$(id -u):$(id -g)" \
+  -v /home/zhiqiangz/container/$container_name/workspace:/home/zhiqiangz/workspace \
   -e SSH_PUBLIC_KEY="$(cat ~/.ssh/id_rsa.pub)" \
   --label user=${user} \
+  --hostname "${container_hostname:-fxxx}" \
   $image_name
 ```
 

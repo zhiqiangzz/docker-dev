@@ -8,4 +8,4 @@ curl -o /tmp/cuda-keyring.deb -L https://developer.download.nvidia.com/compute/c
 # ubuntu-drivers --gpgpu install nvidia:550
 
 # install cuda driver and toolkit
-apt update && apt install -y cuda-toolkit
+apt update && apt install -y cuda-toolkit-12-8
