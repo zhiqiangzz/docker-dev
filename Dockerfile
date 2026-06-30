@@ -22,7 +22,7 @@ RUN apt update && apt install -y \
     gpg gnupg gnupg2 \
     openssh-server \
     sudo \
-    zsh \
+    fish \
     curl \
     wget \
     vim \
@@ -68,7 +68,7 @@ RUN if getent passwd $USER_UID >/dev/null; then \
         groupdel "$(getent group $USER_GID | cut -d: -f1)"; \
     fi && \
     groupadd -g $USER_GID "$user" && \
-    useradd -m -u $USER_UID -g $USER_GID -s "$(which zsh)" "$user" && \
+    useradd -m -u $USER_UID -g $USER_GID -s "$(which fish)" "$user" && \
     usermod -aG sudo "$user" && \
     passwd -l "$user" && \
     echo "$user ALL=(ALL) NOPASSWD:ALL" > "/etc/sudoers.d/$user" && \

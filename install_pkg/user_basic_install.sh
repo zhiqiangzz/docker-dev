@@ -14,12 +14,15 @@ curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | 
 
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-curl -fsSL https://pixi.sh/install.sh | zsh
+curl -fsSL https://pixi.sh/install.sh | bash
 
 # install tmux plugins manager
 git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 git clone https://github.com/zhiqiangzz/dotfiles.git ~/.config/dotfiles
 
-mkdir ~/.config/zim
 mkdir ~/.config/yazi
+
+# activate dotfiles via dotbot (symlinks the fish config, git, nvim, tmux, scripts...).
+# fisher and its plugins (nvm.fish, pure, ...) bootstrap on the first interactive fish session.
+bash ~/.config/dotfiles/install
 popd
