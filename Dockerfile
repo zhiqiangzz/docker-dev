@@ -42,6 +42,7 @@ RUN apt update && apt install -y \
     ripgrep \
     tmux \
     git \
+    python3 \
     gettext \
     gcc \
     libstdc++-12-dev \
