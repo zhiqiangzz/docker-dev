@@ -20,9 +20,15 @@ curl -fsSL https://pixi.sh/install.sh | bash
 git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 git clone https://github.com/zhiqiangzz/dotfiles.git ~/.config/dotfiles
 
-curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher
-
-# activate dotfiles via dotbot (symlinks the fish config, git, nvim, tmux, scripts...).
-# fisher and its plugins (nvm.fish, pure, ...) bootstrap on the first interactive fish session.
+# activate dotfiles via dotbot FIRST (symlinks the fish config, git, nvim, tmux,
+# scripts...). This must run before fisher so that ~/.config/fish/fish_plugins is
+# symlinked into place for `fisher update` to read.
 bash ~/.config/dotfiles/install
+
+# Bootstrap fisher and install every plugin listed in fish_plugins (nvm.fish,
+# pure, fish-exa, autopair, sponge, bass, ...). This MUST run inside fish: both
+# `curl | source` and the `fisher` function are fish-only, so running them under
+# this bash script silently fails. `fisher install` bootstraps fisher itself;
+# `fisher update` then syncs everything declared in the symlinked fish_plugins.
+fish -c 'curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher && fisher update'
 popd
