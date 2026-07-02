@@ -20,7 +20,7 @@ curl -fsSL https://pixi.sh/install.sh | bash
 git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 git clone https://github.com/zhiqiangzz/dotfiles.git ~/.config/dotfiles
 
-mkdir ~/.config/yazi
+curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher
 
 # activate dotfiles via dotbot (symlinks the fish config, git, nvim, tmux, scripts...).
 # fisher and its plugins (nvm.fish, pure, ...) bootstrap on the first interactive fish session.

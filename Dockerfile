@@ -183,7 +183,7 @@ USER $user
 WORKDIR /home/$user
 
 COPY --chown=$user:$user install_pkg/user_basic_install.sh /home/$user/user_basic_install.sh
-COPY --chown=$user:$user set_proxy.sh /home/$user/set_proxy.sh
+COPY --chown=$user:$user proxychains.conf /home/$user/.config/proxychains.conf
 
 RUN bash /home/$user/user_basic_install.sh
 
