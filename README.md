@@ -1,5 +1,8 @@
 # Build and run
-```shell
+
+The `docker run` is wrapped in `bash -c` because it uses `${var:-default}` (POSIX-only). The rest works in both bash and fish.
+
+```bash
 export image_name=zhiqiangzz/cuda-dev:v0
 export container_name=zhiqiangz-cuda-dev
 export network_name=zhiqiangz-bridge
@@ -18,6 +21,7 @@ docker build \
 # -v host_dir:container_dir
 
 mkdir -p /home/zhiqiangz/container/$container_name/workspace
+bash -c '
 docker run \
   -d --privileged \
   --cap-add=SYS_PTRACE --security-opt seccomp=unconfined \
@@ -31,6 +35,7 @@ docker run \
   --label user=${user} \
   --hostname "${container_hostname:-fxxx}" \
   $image_name
+'
 ```
 
 # Useful commands
