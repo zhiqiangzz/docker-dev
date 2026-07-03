@@ -148,30 +148,10 @@ RUN if [ "$INSTALL_CUDA" = "true" ]; then \
 # =========================
 # Optional LLVM
 # =========================
+COPY install_pkg/llvm_install.sh /tmp/llvm_install.sh
+
 RUN if [ "$INSTALL_LLVM" = "true" ]; then \
-        curl -s -o - https://apt.llvm.org/llvm-snapshot.gpg.key \
-            | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc > /dev/null && \
-        echo "deb http://apt.llvm.org/${distro_codename}/ llvm-toolchain-${distro_codename}-${LLVM_VERSION} main" \
-            > /etc/apt/sources.list.d/llvm.list && \
-        echo "deb-src http://apt.llvm.org/${distro_codename}/ llvm-toolchain-${distro_codename}-${LLVM_VERSION} main" \
-            >> /etc/apt/sources.list.d/llvm.list && \
-        apt update && apt install -y \
-            clang-${LLVM_VERSION} \
-            lld-${LLVM_VERSION} \
-            lldb-${LLVM_VERSION} \
-            llvm-${LLVM_VERSION} \
-            clangd-${LLVM_VERSION} \
-            clang-format-${LLVM_VERSION} && \
-        update-alternatives --install /usr/bin/clang clang /usr/bin/clang-${LLVM_VERSION} 100 && \
-        update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-${LLVM_VERSION} 100 && \
-        update-alternatives --install /usr/bin/opt opt /usr/bin/opt-${LLVM_VERSION} 100 && \
-        update-alternatives --install /usr/bin/llc llc /usr/bin/llc-${LLVM_VERSION} 100 && \
-        update-alternatives --install /usr/bin/lld lld /usr/bin/lld-${LLVM_VERSION} 100 && \
-        update-alternatives --install /usr/bin/lldb lldb /usr/bin/lldb-${LLVM_VERSION} 100 && \
-        update-alternatives --install /usr/bin/clangd clangd /usr/bin/clangd-${LLVM_VERSION} 100 && \
-        update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-${LLVM_VERSION} 100 && \
-        update-alternatives --install /usr/bin/llvm-config llvm-config /usr/bin/llvm-config-${LLVM_VERSION} 100 && \
-        update-alternatives --install /usr/bin/FileCheck FileCheck /usr/bin/FileCheck-${LLVM_VERSION} 100; \
+        bash /tmp/llvm_install.sh "$distro_codename" "$LLVM_VERSION"; \
     else \
         echo "Skip LLVM installation"; \
     fi
